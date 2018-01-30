@@ -3,8 +3,11 @@
  * @Author: jin5354
  * @Email: xiaoyanjinx@gmail.com
  * @Last Modified time: 2017-06-24 21:07:34
+ * THIS IS A FORK OF https://github.com/jin5354/axios-cache-plugin
  */
-import {Cacher} from './cacher.js'
+
+import { Cacher } from './cacher.js';
+import _get from 'lodash/get';
 
 /**
  * [wrapper 包装器]
@@ -12,18 +15,11 @@ import {Cacher} from './cacher.js'
  * @param  {[obj]} option
  * @return {[axios instance with cache feature]}
  */
-export default function wrapper(instance, option) {
+export default function wrapper(instance, option = {}) {
+  const cacher = new Cacher(option);
+  const interceptors = option.interceptors;
 
-  const cacher = new Cacher(option)
-
-  const unCacheMethods = [
-    'delete',
-    'head',
-    'options',
-    'post',
-    'put',
-    'patch'
-  ]
+  const unCacheMethods = ['delete', 'head', 'options', 'post', 'put', 'patch'];
 
   /**
    * [axiosWithCache axios instance Proxy]
@@ -31,10 +27,10 @@ export default function wrapper(instance, option) {
    * @return {[promise]}
    */
   function axiosWithCache(...arg) {
-    if(arg.length === 1 && (arg[0].method === 'get' || arg[0].method === undefined)) {
-      return requestWithCacheCheck(arg[0], instance, ...arg)
-    }else {
-      return instance(...arg)
+    if (arg.length === 1 && (arg[0].method === 'get' || arg[0].method === undefined)) {
+      return requestWithCacheCheck(arg[0], instance, ...arg);
+    } else {
+      return instance(...arg);
     }
   }
 
@@ -46,20 +42,21 @@ export default function wrapper(instance, option) {
    * @return {[promise]}
    */
   function requestWithCacheCheck(option, func, ...arg) {
-    if(cacher.needCache(option)) {
-      if(cacher.hasCache(option)) {
-        return Promise.resolve({
-          __fromAxiosCache: true,
-          ...cacher.getCache(option)
-        })
-      }else {
+    // Run intercetpors incase it modifies url/params
+    if (interceptors && interceptors.request) option = interceptors.request(option);
+
+    // Check cache
+    if (cacher.needCache(option)) {
+      if (cacher.hasCache(option)) {
+        return cacher.getCache(option);
+      } else {
         return func(...arg).then(response => {
-          cacher.setCache(option, response)
-          return response
-        })
+          cacher.setCache(option, response);
+          return response;
+        });
       }
-    }else {
-      return instance(...arg)
+    } else {
+      return instance(...arg);
     }
   }
 
@@ -69,56 +66,64 @@ export default function wrapper(instance, option) {
    * @return {[promise]}
    */
   axiosWithCache.get = function(...arg) {
-    if(arg.length === 1) {
-      return requestWithCacheCheck({
-        url: arg[0]
-      }, instance.get, ...arg)
-    }else if(arg.length === 2) {
-      return requestWithCacheCheck({
-        url: arg[0],
-        ...arg[1]
-      }, instance.get, ...arg)
-    }else {
-      return instance.get(...arg)
+    if (arg.length === 1) {
+      return requestWithCacheCheck(
+        {
+          url: arg[0]
+        },
+        instance.get,
+        ...arg
+      );
+    } else if (arg.length === 2) {
+      return requestWithCacheCheck(
+        {
+          url: arg[0],
+          ...arg[1]
+        },
+        instance.get,
+        ...arg
+      );
+    } else {
+      return instance.get(...arg);
     }
-  }
+  };
 
   /**
    * [__addFilter cacher instance addFilter function proxy]
    * @param  {[reg]} filter
    */
   axiosWithCache.__addFilter = function(filter) {
-    cacher.addFilter(filter)
-  }
+    cacher.addFilter(filter);
+  };
 
   /**
    * [__removeFilter cacher instance removeFilter function proxy]
    * @param  {[reg]} filter
    */
   axiosWithCache.__removeFilter = function(filter) {
-    cacher.removeFilter(filter)
-  }
+    cacher.removeFilter(filter);
+  };
 
   /**
    * [cacher instance proxy]
    */
-  axiosWithCache.__cacher = cacher
+  axiosWithCache.__cacher = cacher;
 
   /**
    * [__clearCache cacher instance clear function proxy]
    */
-  axiosWithCache.__clearCache = function(){
-    cacher.clear()
-  }
+  axiosWithCache.__clearCache = function() {
+    cacher.clear();
+  };
 
   /**
    * [proxy axios instance functions which are no need to be cached]
    */
   unCacheMethods.forEach(method => {
     axiosWithCache[method] = function(...arg) {
-      return instance[method](...arg)
-    }
-  })
+      return instance[method](...arg);
+    };
+  });
 
-  return axiosWithCache
+  return axiosWithCache;
 }

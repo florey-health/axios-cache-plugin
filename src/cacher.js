@@ -6,14 +6,13 @@
  */
 
 export class Cacher {
-
   constructor(option) {
-    this.cacheMap = new Map()
-    this.option = option || {}
-    this.maxCacheSize = this.option.maxCacheSize || 15
-    this.ttl = this.option.ttl
-    this.filters = []
-    this.excludeHeaders = this.option.excludeHeaders || false
+    this.cacheMap = new Map();
+    this.option = option || {};
+    this.maxCacheSize = this.option.maxCacheSize || 15;
+    this.ttl = this.option.ttl;
+    this.filters = [];
+    this.excludeHeaders = this.option.excludeHeaders || false;
   }
 
   /**
@@ -21,7 +20,7 @@ export class Cacher {
    * @param {[reg]} reg
    */
   addFilter(reg) {
-    this.filters.push(reg)
+    this.filters.push(reg);
   }
 
   /**
@@ -29,9 +28,9 @@ export class Cacher {
    * @param  {[reg]} reg
    */
   removeFilter(reg) {
-    let index = this.filters.indexOf(reg)
-    if(index !== -1) {
-      this.filters.splice(index, 1)
+    let index = this.filters.indexOf(reg);
+    if (index !== -1) {
+      this.filters.splice(index, 1);
     }
   }
 
@@ -41,18 +40,18 @@ export class Cacher {
    * @param {[any]} value
    */
   setCache(key, value) {
-    if(this.excludeHeaders) delete key.headers
+    if (this.excludeHeaders) delete key.headers;
 
-    this.cacheMap.set(JSON.stringify(key), value)
-    if(this.maxCacheSize && this.cacheMap.size > this.maxCacheSize) {
-      this.cacheMap.delete([...(this.cacheMap).keys()][0])
+    this.cacheMap.set(JSON.stringify(key), value);
+    if (this.maxCacheSize && this.cacheMap.size > this.maxCacheSize) {
+      this.cacheMap.delete([...this.cacheMap.keys()][0]);
     }
-    if(this.ttl) {
+    if (this.ttl) {
       setTimeout(() => {
-        if(this.hasCache(key)) {
-          this.cacheMap.delete(JSON.stringify(key))
+        if (this.hasCache(key)) {
+          this.cacheMap.delete(JSON.stringify(key));
         }
-      }, this.ttl)
+      }, this.ttl);
     }
   }
 
@@ -63,8 +62,8 @@ export class Cacher {
    */
   needCache(option) {
     return this.filters.some(reg => {
-      return reg.test(option.url)
-    })
+      return reg.test(option.url);
+    });
   }
 
   /**
@@ -73,7 +72,7 @@ export class Cacher {
    * @return {Boolean}
    */
   hasCache(key) {
-    return this.cacheMap.has(JSON.stringify(key))
+    return this.cacheMap.has(JSON.stringify(key));
   }
 
   /**
@@ -82,14 +81,13 @@ export class Cacher {
    * @return {[any]}
    */
   getCache(key) {
-    return this.cacheMap.get(JSON.stringify(key))
+    return this.cacheMap.get(JSON.stringify(key));
   }
 
   /**
    * [clear 清空缓存]
    */
   clear() {
-    this.cacheMap.clear()
+    this.cacheMap.clear();
   }
-
 }
