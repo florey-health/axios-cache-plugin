@@ -48,7 +48,7 @@ export default function wrapper(instance, option = {}) {
     // Check cache
     if (cacher.needCache(option)) {
       if (cacher.hasCache(option)) {
-        return cacher.getCache(option);
+        return Promise.resolve(cacher.getCache(option));
       } else {
         return func(...arg).then(response => {
           cacher.setCache(option, response);
