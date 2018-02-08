@@ -1,6 +1,6 @@
 {
   "name": "axios-cache-plugin",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Help you cache GET request when using axios.",
   "main": "src/index.js",
   "repository": {
@@ -12,7 +12,8 @@
   },
   "scripts": {
     "test": "nyc ava --verbose",
-    "build": "NODE_ENV=production webpack --progress --config build/webpack.build.config.js"
+    "build": "NODE_ENV=production webpack --progress --config build/webpack.build.config.js",
+    "postinstall": "init-git-hooks"
   },
   "ava": {
     "require": [
