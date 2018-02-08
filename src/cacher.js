@@ -4,6 +4,7 @@
  * @Email: xiaoyanjinx@gmail.com
  * @Last Modified time: 2017-06-24 21:14:25
  */
+import _ from 'lodash';
 
 export class Cacher {
   constructor(option) {
@@ -62,7 +63,26 @@ export class Cacher {
    */
   needCache(option) {
     return this.filters.some(reg => {
-      return reg.test(option.url);
+      if (reg.constructor === RegExp) {
+        return reg.test(option.url);
+      } else {
+        // Our custom object that lets matching params as well
+        const { url, params } = reg;
+        if (!url) throw new Error('Invalid cache matching object');
+
+        // See if url matches
+        const matchesUrl = reg.url.test(option.url);
+        if (!params) return matchesUrl;
+
+        // Try to match params as well
+        const paramKeys = Object.keys(reg.params);
+        const matchesParams = paramKeys.reduce((matches, k) => {
+          if (!matches) return matches;
+          return params[k].test(_.get(option, `params.${k}`));
+        }, true);
+
+        return matchesUrl && matchesParams;
+      }
     });
   }
 
