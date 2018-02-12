@@ -1,3 +1,14 @@
 {
-  "presets": ["es2015", "es2016", "stage-2"]
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "browsers": [">5%"]
+        },
+        "useBuiltIns": true
+      }
+    ],
+    "stage-0"
+  ]
 }

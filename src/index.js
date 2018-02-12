@@ -67,22 +67,9 @@ export default function wrapper(instance, option = {}) {
    */
   axiosWithCache.get = function(...arg) {
     if (arg.length === 1) {
-      return requestWithCacheCheck(
-        {
-          url: arg[0]
-        },
-        instance.get,
-        ...arg
-      );
+      return requestWithCacheCheck({ url: arg[0] }, instance.get, ...arg);
     } else if (arg.length === 2) {
-      return requestWithCacheCheck(
-        {
-          url: arg[0],
-          ...arg[1]
-        },
-        instance.get,
-        ...arg
-      );
+      return requestWithCacheCheck(Object.assign({ url: arg[0] }, arg[1]), instance.get, ...arg);
     } else {
       return instance.get(...arg);
     }

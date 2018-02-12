@@ -16,9 +16,7 @@
     "postinstall": "init-git-hooks"
   },
   "ava": {
-    "require": [
-      "babel-register"
-    ],
+    "require": ["babel-register"],
     "babel": "inherit"
   },
   "author": "jin5354<xiaoyanjinx@gmail.com>",
